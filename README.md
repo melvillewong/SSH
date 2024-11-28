@@ -1,2 +1,2 @@
 # SSH
-<h1>Let's get this done!</h1>
+<h2>Let's get this done!</h2>
