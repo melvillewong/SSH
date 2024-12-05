@@ -5,11 +5,34 @@ services:
     image: postgres:14
     container_name: postgres_server
     ports:
-      - "5432:5432"  # Expose PostgreSQL on port 5432
+      - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 011006
       POSTGRES_DB: ssh_smart_scheduling
     volumes:
       - ./data:/var/lib/postgresql/data
-      - ./ssh_smart_scheduling.sql:/docker-entrypoint-initdb.d/ssh_smart_scheduling.sql
+    networks:
+      - postgres_network
+
+  flyway:
+    image: flyway/flyway:9.21.0
+    container_name: flyway_migrations
+    depends_on:
+      - postgres
+    entrypoint: ["flyway"]
+    command:
+      [
+        "-url=jdbc:postgresql://postgres_server:5432/ssh_smart_scheduling",
+        "-user=postgres",
+        "-password=011006",
+        "migrate"
+      ]
+    volumes:
+      - ./migrations:/flyway/sql
+    networks:
+      - postgres_network
+
+networks:
+  postgres_network:
+    driver: bridge
