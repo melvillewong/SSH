@@ -1,0 +1,11 @@
+FROM postgres:14
+
+# Install Flyway
+RUN apt-get update && apt-get install -y wget unzip
+RUN wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/9.21.0/flyway-commandline-9.21.0-linux-x64.tar.gz | tar xvz -C /usr/local
+
+# Add migration files
+COPY migrations/ /migrations
+
+# Run migrations on startup
+CMD ["flyway", "-url=jdbc:postgresql://localhost:5432/ssh_smart_scheduling", "-user=postgres", "-password=011006", "migrate"]

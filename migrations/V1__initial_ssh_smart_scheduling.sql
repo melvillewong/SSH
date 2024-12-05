@@ -2,11 +2,10 @@
 -- File: ssh_smart_scheduling.sql
 
 ---------------------------------------------------------
--- Database creation and connection
+-- Define ENUM types
 ---------------------------------------------------------
-DROP DATABASE IF EXISTS "SSH_Smart_Scheduling";
-CREATE DATABASE "SSH_Smart_Scheduling";
-\c SSH_Smart_Scheduling;
+CREATE TYPE action_type AS ENUM ('enter', 'leave');
+CREATE TYPE chore_action AS ENUM ('start', 'finish');
 
 ---------------------------------------------------------
 -- Tables creation
@@ -16,7 +15,7 @@ CREATE TABLE access_log (
     access_id SERIAL PRIMARY KEY,
     resident_id INT NOT NULL,
     timestamp TIMESTAMP NOT NULL,
-    action ENUM('enter', 'leave') NOT NULL
+    action action_type NOT NULL
 );
 
 -- Create the 'chores_log' table
@@ -25,7 +24,7 @@ CREATE TABLE chores_log (
     resident_id INT NOT NULL,
     chore_type VARCHAR(50) NOT NULL,
     timestamp TIMESTAMP NOT NULL,
-    action ENUM('start', 'finish') NOT NULL
+    action chore_action NOT NULL
 );
 
 -- Create the 'alone_hour_suggestions' table
