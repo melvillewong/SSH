@@ -1,10 +1,10 @@
-# SSH
+SSH <br>
+Let's get this done!
 
-<h2>Let's get this done!</h2>
-___
 ## Prerequisites
 - PostgreSQL 14.0
 - Docker Installation
+
 ___
 
 ### Docker Installation Tutorial with migration implementation (Flyway)
@@ -33,5 +33,5 @@ ___
   - Ensure that the message "Successfully applied 1 migration (execution time 00:00.XXXs)." is displayed for each migration, else please update the relevant files for it to run successfully.
 ___
 #### Git Pull and Git Push
-Please be sure to `git pull` each time before starting any work on the database, as it retrieves the latest version of the repository.
-And please `git push` to prevent any versions to be lost in between each migration.
+- Please be sure to `git pull` each time before starting any work on the database, as it retrieves the latest version of the repository.
+- And please `git push` to prevent any versions to be lost in between each migration.
