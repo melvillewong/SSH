@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: postgres_server
+    ports:
+      - "5432:5432"  # Expose PostgreSQL on port 5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: ssh_smart_scheduling
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/ssh_smart_scheduling.sql
