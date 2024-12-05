@@ -22,14 +22,16 @@ services:
       - ./data:/var/lib/postgresql/data
 ```
 
-	•	POSTGRES_USER: The username for the database.
-	•	POSTGRES_PASSWORD: The password for the database.
-	•	POSTGRES_DB: The default database.
+- POSTGRES_USER: The username for the database.
+- POSTGRES_PASSWORD: The password for the database.
+- POSTGRES_DB: The default database.
 
 2. Add a .gitignore file
+
 ```plaintext
 data/
 ```
+
 This ensures the database data folder isn’t pushed to the repository.
 
 3. Add an Initialization Script (Optional)
@@ -46,7 +48,9 @@ INSERT INTO users (name, email) VALUES
 ('Alice', 'alice@example.com'),
 ('Bob', 'bob@example.com');
 ```
+
 Update docker-compose.yml to include the initialization script:
+
 ```yaml
 volumes:
   - ./data:/var/lib/postgresql/data
@@ -54,11 +58,12 @@ volumes:
 ```
 Step 2: Push the Repository to GitHub
 
-	1.	Add the files to your repository:
-	•	docker-compose.yml
-	•	init.sql (if applicable)
-	•	.gitignore
-	2.	Commit and push:
+1. Add the files to your repository:
+- docker-compose.yml
+- init.sql (if applicable)
+- .gitignore
+2. Commit and push:
+
 ```bash
 git add .
 git commit -m "Set up PostgreSQL server with Docker"
@@ -66,45 +71,49 @@ git push origin main
 ```
 Step 3: Collaborators Can Spin Up the Server
 
-	1.	Clone the Repository:
+1. Clone the Repository:
+
 ```bash
 git clone https://github.com/yourusername/yourrepository.git
 cd yourrepository
 ```
 
-	2.	Install Docker:
-	•	Follow the Docker installation guide.
-	3.	Start the PostgreSQL Server:
+2. Install Docker:
+- Follow the Docker installation guide.
+3. Start the PostgreSQL Server:
+
 ```bash
 docker-compose up
 ```
 
-	4.	Access the Database:
-	•	Host: localhost
-	•	Port: 5432
-	•	Username: postgres
-	•	Password: yourpassword
-	•	Database: yourdatabase
+4. Access the Database:
+- Host: localhost
+- Port: 5432
+- Username: postgres
+- Password: yourpassword
+- Database: yourdatabase
 
 Step 4: Add Access Control (Optional)
 
 To expose the server for remote access:
-	1.	Update docker-compose.yml:
+1. Update docker-compose.yml:
+
 ```yaml
 ports:
   - "0.0.0.0:5432:5432"
 ```
 
-	2.	Configure PostgreSQL:
-	•	Set listen_addresses = '*' in postgresql.conf.
-	•	Update pg_hba.conf to allow remote access.
-	3.	Commit and Push:
+2. Configure PostgreSQL:
+- Set listen_addresses = '*' in postgresql.conf.
+- Update pg_hba.conf to allow remote access.
+3. Commit and Push:
 Be cautious when exposing the database publicly—use strong passwords and restrict access.
 
 Step 5: Automate with GitHub Actions (Optional)
 
 To spin up the server automatically:
-	1.	Create a .github/workflows/postgres.yml file:
+1. Create a .github/workflows/postgres.yml file:
+
 ```yaml
 name: PostgreSQL Server
 
@@ -124,13 +133,13 @@ jobs:
         run: docker-compose up -d
 ```
 
-	2.	This will start the PostgreSQL server automatically whenever changes are pushed.
+2. This will start the PostgreSQL server automatically whenever changes are pushed.
 
 Summary
 
 This setup ensures collaborators can:
-	•	Clone the repository.
-	•	Run the PostgreSQL server locally using Docker.
-	•	Share the same database schema and initial data.
+- Clone the repository.
+- Run the PostgreSQL server locally using Docker.
+- Share the same database schema and initial data.
 
 Let me know if you need more help! 😊
