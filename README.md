@@ -1,6 +1,3 @@
-SSH <br>
-Let's get this done!
-
 ## Prerequisites
 - PostgreSQL 14.0
 - Docker Installation
