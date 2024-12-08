@@ -1,5 +1,10 @@
 ## Here are lists of SQL queries that shall be used
 
+- This is a SQL query that returns the list of number of residents present in the house for every change in the 'enter' and 'leave' state
+```sql
+SELECT timestamp, action, SUM(CASE WHEN action = 'enter' THEN 1 ELSE -1 END) OVER (ORDER BY timestamp) AS net_presence FROM access_log;
+```
+
 - This adds the start and end timestamp of periods where no residents are at home to the table of total_hour_suggestions, with resident_id set to '0' (indicating nobody)
 ```sql
 WITH resident_presence AS (
