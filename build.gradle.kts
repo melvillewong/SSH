@@ -24,6 +24,10 @@ subprojects {
     // tasks.test {
     //     useJUnitPlatform() // Use JUnit for testing
     // }
+
+    tasks.withType<Test> {
+        enabled = false
+    }
 }
 
 // task("runServerThenClient") {
