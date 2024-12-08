@@ -8,7 +8,7 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "011006"
+      POSTGRES_PASSWORD: 011006
       POSTGRES_DB: ssh_smart_scheduling
     volumes:
       - ./data:/var/lib/postgresql/data
