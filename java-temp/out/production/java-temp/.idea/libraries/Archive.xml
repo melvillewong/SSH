@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Archive">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/out/production/Templates/Archive.zip!/" />
+      <root url="file://$PROJECT_DIR$/out/production/Templates/lib" />
+    </CLASSES>
+    <JAVADOC />
+    <NATIVE>
+      <root url="file://$PROJECT_DIR$/out/production/Templates/lib" />
+    </NATIVE>
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/out/production/Templates/lib" recursive="false" />
+  </library>
+</component>

@@ -1,6 +1,45 @@
 -- SSH Smart Scheduling Assistant Database
 -- File: ssh_smart_scheduling.sql
 
+-- WITH resident_presence AS (SELECT timestamp, action, SUM(CASE WHEN action = 'enter' THEN 1 ELSE -1 END) OVER (ORDER BY timestamp) AS net_presence FROM access_log), empty_periods AS (SELECT timestamp AS start_time, LEAD(timestamp) OVER (ORDER BY timestamp) AS end_time FROM resident_presence WHERE net_presence = 0) SELECT start_time, end_time FROM empty_periods WHERE end_time IS NOT NULL;
+
+-- Below is the SQL query for finding the start_time and end_time of the empty period where no residents are present in the household
+--
+-- WITH resident_presence AS (
+--     SELECT 
+--         timestamp, 
+--         action, 
+--         SUM(CASE WHEN action = 'enter' THEN 1 ELSE -1 END) 
+--         OVER (ORDER BY timestamp) AS net_presence
+--     FROM access_log
+-- ),
+-- zero_to_one_transitions AS (
+--     SELECT 
+--         r1.timestamp AS start_time, 
+--         r2.timestamp AS end_time
+--     FROM resident_presence r1
+--     JOIN resident_presence r2
+--     ON r1.timestamp < r2.timestamp
+--     WHERE r1.net_presence = 0 AND r2.net_presence = 1
+--     AND NOT EXISTS (
+--         SELECT 1 
+--         FROM resident_presence r3
+--         WHERE r3.timestamp > r1.timestamp AND r3.timestamp < r2.timestamp AND r3.net_presence != 0
+--     )
+-- )
+-- SELECT start_time, end_time
+-- FROM zero_to_one_transitions
+-- ORDER BY start_time;
+--
+--
+-- The result is returned below
+--
+--      start_time      |      end_time       
+-- ---------------------+---------------------
+--  2024-12-03 15:29:36 | 2024-12-03 17:15:12
+--  2024-12-06 07:43:47 | 2024-12-06 08:52:15
+-- (2 rows)
+
 ---------------------------------------------------------
 -- Define ENUM types
 ---------------------------------------------------------
@@ -25,6 +64,12 @@ CREATE TABLE chores_log (
     chore_type VARCHAR(50) NOT NULL,
     timestamp TIMESTAMP NOT NULL,
     action chore_action NOT NULL
+);
+
+CREATE TABLE total_hour_suggestions (
+    resident_id INT NOT NULL,
+    start_timestamp TIMESTAMP NOT NULL,
+    end_timestamp TIMESTAMP NOT NULL
 );
 
 -- Create the 'alone_hour_suggestions' table
@@ -64,7 +109,7 @@ INSERT INTO access_log (access_id, resident_id, timestamp, action) VALUES
 (11, 3, '2024-12-03 08:19:47', 'enter'),
 (12, 4, '2024-12-03 09:23:31', 'leave'),
 (13, 1, '2024-12-03 10:17:42', 'leave'),
-(14, 5, '2024-12-03 12:43:18', 'enter'),
+(14, 5, '2024-12-03 12:43:18', 'leave'),
 (15, 2, '2024-12-03 13:09:51', 'leave'),
 (16, 3, '2024-12-03 15:29:36', 'leave'),
 (17, 4, '2024-12-03 17:15:12', 'enter'),
@@ -83,7 +128,7 @@ INSERT INTO access_log (access_id, resident_id, timestamp, action) VALUES
 (28, 2, '2024-12-05 07:29:58', 'enter'),
 (29, 3, '2024-12-05 08:14:32', 'enter'),
 (30, 4, '2024-12-05 08:39:03', 'leave'),
-(31, 5, '2024-12-05 10:34:14', 'enter'),
+(31, 5, '2024-12-05 10:34:14', 'leave'),
 (32, 1, '2024-12-05 12:12:07', 'leave'),
 -- Day 5: Friday
 (33, 2, '2024-12-06 07:03:38', 'leave'),
@@ -108,7 +153,7 @@ INSERT INTO access_log (access_id, resident_id, timestamp, action) VALUES
 (50, 4, '2024-12-08 08:11:34', 'leave'),
 (51, 1, '2024-12-08 09:33:47', 'enter'),
 (52, 2, '2024-12-08 10:18:22', 'leave'),
-(53, 5, '2024-12-08 12:00:49', 'leave'),
+(53, 5, '2024-12-08 12:00:49', 'enter'),
 (54, 4, '2024-12-08 13:49:21', 'enter'),
 (55, 3, '2024-12-08 15:35:04', 'leave'),
 (56, 2, '2024-12-08 17:42:58', 'enter');
