@@ -1,2 +1,35 @@
+# General data and environment files
 data/
 *.env
+
+# IDE-specific files
+.idea/
+*.iml
+.vscode/
+
+# Java build artifacts
+*.class
+*.jar
+*.war
+*.ear
+
+# System files (MacOS, Windows)
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Gradle-specific directories and files
+.gradle/
+build/
+**/build/
+
+# Gradle wrapper files (keep these if we use Gradle wrapper)
+!gradlew
+!gradlew.bat
+!gradle/wrapper/
+
+# Temporary files created by editors or operating systems
+*.swp
+*.tmp
