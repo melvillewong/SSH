@@ -1,4 +1,4 @@
-## Following are the codes planned to be used
+## Following are the queries planned to be used
 
 - The following query compile a temporary result set of the duration of each chore shift done, in chore_type and resident_id, to be used for further computation
 ```sql
