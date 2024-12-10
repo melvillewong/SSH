@@ -48,3 +48,16 @@ Configuration cache entry reused.
     - Defines the configuration for the Gradle multi-project build.
     - Used to specifying the root project and any included subprojects.
     - include() all your submodules.
+
+## Access to Docker PostgreSQL Container
+I have added **docker plugin** and several **Docker-related tasks** in the server module (configured in `app/server/build.gradle.kts`)
++ Ensure Docker Desktop is running.
++ It should automatically create the Docker container with docker-compose when running the server with `./gradlew :app:server:run`.
+
+Other useful Docker-related Gradle's tasks:
++ `./gradlew createPostgresContainer`
++ `./gradlew destroyPostgresContainer`
++ `./gradlew startPostgresContainer`
++ `./gradlew stopPostgresContainer`
++ `./gradlew restartPostgresContainer`
++ `./gradlew checkMigrationPostgresContainer`
