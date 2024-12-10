@@ -1,13 +1,10 @@
 ## Following are the queries planned to be used
 
-<<<<<<< HEAD
-The following query compile a temporary result set of the duration of each chore shift done, in chore_type and resident_id, to be used for further computation
-=======
+<\h2>Chore Shift Duration Recommendation<h2> 
 - This is a SQL query that returns the list of number of residents present in the house for every change in the 'enter' and 'leave' state
 ```sql
 SELECT resident_id, timestamp, action, SUM(CASE WHEN action = 'enter' THEN 1 ELSE -1 END) OVER (ORDER BY timestamp) AS net_presence FROM access_log;
 ```
->>>>>>> remotes/origin/feature/sql-samples
 
 ```sql
 WITH chore_records_durations AS (
@@ -41,7 +38,6 @@ WITH chore_records_durations AS (
 SELECT * FROM chore_records_durations ORDER BY resident_id;
 ```
 
-<<<<<<< HEAD
 The chore_records_durations is produced as follow: 
 | Resident ID | Chore Type   | Start Time           | Finish Time          | Duration   |
 |-------------|--------------|----------------------|----------------------|------------|
@@ -226,4 +222,3 @@ ORDER BY start_timestamp;
 |      2      | 2024-12-06 07:03:38 | 2024-12-06 07:43:47   |
 |      1      | 2024-12-06 08:52:15 | 2024-12-06 09:37:26   |
 (6 rows)
->>>>>>> remotes/origin/feature/sql-samples
