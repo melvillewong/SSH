@@ -97,7 +97,7 @@ public class RecordsDatabaseService extends Thread{
             this.requestStr[1]= lastNameStringBuffer.toString();
 			
          }catch(IOException e){
-            System.out.println("Service thread " + this.getId() + ": " + e);
+            System.out.println("Service thread " + this.getName() + ": " + e);
         }
         return this.requestStr;
     }
@@ -176,10 +176,10 @@ public class RecordsDatabaseService extends Thread{
     
             // Check if there is data to send
             if (this.outcome == null || !this.outcome.next()) {
-                System.out.println("Service thread " + this.getId() + ": No data to send.");
+                System.out.println("Service thread " + this.getName() + ": No data to send.");
                 outcomeStreamWriter.writeObject(null); // Send a null object if no data
             } else {
-                System.out.println("Service thread " + this.getId() + ": Sending CachedRowSet with data:");
+                System.out.println("Service thread " + this.getName() + ": Sending CachedRowSet with data:");
                 this.outcome.beforeFirst(); // Reset the cursor for sending data
                 while (this.outcome.next()) {
                     System.out.println(
@@ -199,9 +199,9 @@ public class RecordsDatabaseService extends Thread{
     
             // Close the service socket
             this.serviceSocket.close();
-            System.out.println("Service thread " + this.getId() + ": Service outcome returned and connection closed.");
+            System.out.println("Service thread " + this.getName() + ": Service outcome returned and connection closed.");
         } catch (IOException | SQLException e) {
-            System.err.println("Service thread " + this.getId() + ": Error while returning outcome: " + e.getMessage());
+            System.err.println("Service thread " + this.getName() + ": Error while returning outcome: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -213,7 +213,7 @@ public class RecordsDatabaseService extends Thread{
         try {
             // Retrieve the service request from the socket
             this.retrieveRequest();
-            System.out.println("Service thread " + this.getId() + ": Request retrieved: "
+            System.out.println("Service thread " + this.getName() + ": Request retrieved: "
                     + "firstName->" + this.requestStr[0] + "; lastName->" + this.requestStr[1]);
     
             // Attend the request and execute the database query
@@ -223,24 +223,24 @@ public class RecordsDatabaseService extends Thread{
                 // Send back the query outcome
                 this.returnServiceOutcome();
             } else {
-                System.out.println("Service thread " + this.getId() + ": Unable to process the request successfully.");
+                System.out.println("Service thread " + this.getName() + ": Unable to process the request successfully.");
             }
     
         } catch (Exception e) {
-            System.err.println("Service thread " + this.getId() + ": Unexpected error occurred: " + e.getMessage());
+            System.err.println("Service thread " + this.getName() + ": Unexpected error occurred: " + e.getMessage());
             e.printStackTrace();
         } finally {
             try {
                 if (this.serviceSocket != null && !this.serviceSocket.isClosed()) {
                     this.serviceSocket.close();
-                    System.out.println("Service thread " + this.getId() + ": Connection closed.");
+                    System.out.println("Service thread " + this.getName() + ": Connection closed.");
                 }
             } catch (IOException e) {
-                System.err.println("Service thread " + this.getId() + ": Error while closing socket: " + e.getMessage());
+                System.err.println("Service thread " + this.getName() + ": Error while closing socket: " + e.getMessage());
             }
         }
     
-        System.out.println("Service thread " + this.getId() + ": Finished service.");
+        System.out.println("Service thread " + this.getName() + ": Finished service.");
     }
 
 }

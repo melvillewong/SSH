@@ -49,7 +49,7 @@ public class RecordsDatabaseServer {
             while (true) {
 
                 Socket socket = this.serverSocket.accept();
-                RecordsDatabaseService tmpServiceThread = new RecordsDatabaseService(socket);
+                new RecordsDatabaseService(socket);
             }
         } catch (Exception e){
             //The creation of the server socket can cause several exceptions;
