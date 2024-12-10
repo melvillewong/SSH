@@ -1,9 +1,7 @@
 # General data and environment files
 data/
 *.env
-<<<<<<< HEAD
 java-temp/Credentials.java
-=======
 
 # IDE-specific files
 .idea/
@@ -36,4 +34,3 @@ build/
 # Temporary files created by editors or operating systems
 *.swp
 *.tmp
->>>>>>> origin/main
