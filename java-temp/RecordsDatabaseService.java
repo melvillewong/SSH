@@ -1,7 +1,7 @@
 /*
  * RecordsDatabaseService.java
  *
- * The service threads for the records database server.
+ * The service threads for the ssh smart scheduling database server.
  * This class implements the database access service, i.e. opens a JDBC connection
  * to the database, makes and retrieves the query, and sends back the result.
  *
@@ -23,11 +23,43 @@ public class RecordsDatabaseService extends Thread{
     private String PASSWORD = Credentials.PASSWORD;
     private String URL      = Credentials.URL;
 
+    private void runSqlScript(String filePath) {
+        try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
+            System.out.println("Executing SQL script: " + filePath);
+            
+            // Read and execute SQL commands from the file
+            StringBuilder sqlBuilder = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sqlBuilder.append(line).append("\n");
+                }
+            }
+            
+            // Split commands by semicolon and execute them
+            String[] sqlCommands = sqlBuilder.toString().split(";");
+            try (Statement stmt = connection.createStatement()) {
+                for (String sql : sqlCommands) {
+                    if (!sql.trim().isEmpty()) {
+                        stmt.execute(sql.trim());
+                    }
+                }
+            }
+            
+            System.out.println("SQL script executed successfully.");
+        } catch (SQLException | IOException e) {
+            System.err.println("Error executing SQL script: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     //Class constructor
     public RecordsDatabaseService(Socket aSocket){
         
 		//TO BE COMPLETED
         serviceSocket = aSocket;
+        runSqlScript("autorun_total_hour_suggestion.sql");
+        System.out.println("SQL script executed and database state verified.");
         this.start();
     }
 
@@ -77,12 +109,30 @@ public class RecordsDatabaseService extends Thread{
 		
 		this.outcome = null;
 		
-		String sql = "SELECT record.title,record.label,record.genre,record.rrp,COUNT(recordcopy.copyID) AS copies FROM record JOIN artist ON record.artistID = artist.artistID JOIN recordcopy ON record.recordID = recordcopy.recordID JOIN recordshop ON recordcopy.recordshopID = recordshop.recordshopID where artist.lastname = ? AND recordshop.city = ? GROUP BY record.title,record.label,record.genre,record.rrp HAVING COUNT(recordcopy.copyID)>0"; //TO BE COMPLETED- Update this line as needed.
+		String sql = """
+            WITH selected_resident AS (
+                SELECT resident_id
+                FROM residents
+                WHERE firstName = ? AND lastName = ?
+            )
+            SELECT 
+                ts.resident_id, 
+                ts.start_timestamp, 
+                ts.end_timestamp, 
+                CASE 
+                    WHEN ts.resident_id = 0 THEN 'Occupancy = 0'
+                    ELSE 'Solo Time'
+                END AS status
+            FROM total_hour_suggestions ts
+            WHERE ts.resident_id = 0 
+            OR ts.resident_id = (SELECT resident_id FROM selected_resident)
+            ORDER BY ts.start_timestamp;
+            """;
 
         try (Connection con = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-             PreparedStatement stmt = con.prepareStatement(sql)) {
+            PreparedStatement stmt = con.prepareStatement(sql)) {
 
-            System.out.println("Executing query with parameters: artist=" + requestStr[0] + ", recordshop=" + requestStr[1]);
+            System.out.println("Executing query with parameters: firstName=" + requestStr[0] + ", lastName=" + requestStr[1]);
             stmt.setString(1, requestStr[0]);
             stmt.setString(2, requestStr[1]);
 
@@ -92,22 +142,22 @@ public class RecordsDatabaseService extends Thread{
             crs.populate(rs);
             this.outcome = crs;
 
-            if (!crs.next()) {
-                System.out.println("No data found in CachedRowSet after population.");
-            } else {
-                System.out.println("Data found in CachedRowSet:");
-                crs.beforeFirst(); // Reset cursor
-                while (crs.next()) {
-                    System.out.println(
-                            "Title: " + crs.getString("title") +
-                                    " | Label: " + crs.getString("label") +
-                                    " | Genre: " + crs.getString("genre") +
-                                    " | RRP: " + crs.getDouble("rrp") +
-                                    " | Copies: " + crs.getInt("copies")
-                    );
-                }
-                crs.beforeFirst(); // Reset for client
-            }
+            // if (!crs.next()) {
+            //     System.out.println("No data found in CachedRowSet after population.");
+            // } else {
+            //     System.out.println("Data found in CachedRowSet:");
+            //     crs.beforeFirst(); // Reset cursor
+            //     while (crs.next()) {
+            //         System.out.println(
+            //                 "Title: " + crs.getString("title") +
+            //                         " | Label: " + crs.getString("label") +
+            //                         " | Genre: " + crs.getString("genre") +
+            //                         " | RRP: " + crs.getDouble("rrp") +
+            //                         " | Copies: " + crs.getInt("copies")
+            //         );
+            //     }
+            //     crs.beforeFirst(); // Reset for client
+            // }
         } catch (SQLException e) {
             System.err.println("Database error: " + e.getMessage());
             e.printStackTrace();
@@ -118,77 +168,78 @@ public class RecordsDatabaseService extends Thread{
     }
 
     //Wrap and return service outcome
-    public void returnServiceOutcome(){
+    public void returnServiceOutcome() {
         try {
-			//Return outcome
-			//TO BE COMPLETED
+            // Create an output stream to send the outcome back to the client
             OutputStream outcomeStream = this.serviceSocket.getOutputStream();
             ObjectOutputStream outcomeStreamWriter = new ObjectOutputStream(outcomeStream);
-            outcomeStreamWriter.writeObject(this.outcome);
-            outcomeStreamWriter.flush();
-            outcomeStreamWriter.close();
-            if (this.outcome == null) {
+    
+            // Check if there is data to send
+            if (this.outcome == null || !this.outcome.next()) {
                 System.out.println("Service thread " + this.getId() + ": No data to send.");
+                outcomeStreamWriter.writeObject(null); // Send a null object if no data
             } else {
                 System.out.println("Service thread " + this.getId() + ": Sending CachedRowSet with data:");
-                try {
-                    while (this.outcome.next()) {
-                        System.out.println(
-                                "Title: " + this.outcome.getString("title") +
-                                        " | Label: " + this.outcome.getString("label") +
-                                        " | Genre: " + this.outcome.getString("genre") +
-                                        " | RRP: " + this.outcome.getDouble("rrp") +
-                                        " | Copies: " + this.outcome.getInt("copies")
-                        );
-                    }
-                    this.outcome.beforeFirst(); // Reset the cursor for the client to iterate over it
-                } catch (SQLException e) {
-                    System.out.println("Error iterating over CachedRowSet: " + e.getMessage());
+                this.outcome.beforeFirst(); // Reset the cursor for sending data
+                while (this.outcome.next()) {
+                    System.out.println(
+                            "Resident ID: " + this.outcome.getInt("resident_id") +
+                            " | Start Time: " + this.outcome.getTimestamp("start_timestamp") +
+                            " | End Time: " + this.outcome.getTimestamp("end_timestamp") +
+                            " | Status: " + this.outcome.getString("status")
+                    );
                 }
+                this.outcome.beforeFirst(); // Reset the cursor for the client to process
+                outcomeStreamWriter.writeObject(this.outcome); // Send the CachedRowSet object
             }
-            while (outcome.next()) {
-                String title = outcome.getString("title");
-                String label = outcome.getString("label");
-                String genre = outcome.getString("genre");
-                double price = outcome.getDouble("rrp");
-                int copies = outcome.getInt("copies");
-
-                System.out.println(title + " | " + label + " | " + genre + " | " + price + " | " + copies);
-            }
-            System.out.println("Service thread " + this.getId() + ": Service outcome returned; " + this.outcome);
-            
-			//Terminating connection of the service socket
-			//TO BE COMPLETED
+    
+            // Flush and close the stream
+            outcomeStreamWriter.flush();
+            outcomeStreamWriter.close();
+    
+            // Close the service socket
             this.serviceSocket.close();
-        }catch (IOException e){
-            System.out.println("Service thread " + this.getId() + ": " + e);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            System.out.println("Service thread " + this.getId() + ": Service outcome returned and connection closed.");
+        } catch (IOException | SQLException e) {
+            System.err.println("Service thread " + this.getId() + ": Error while returning outcome: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     //The service thread run() method
-    public void run()
-    {
-		try {
-			System.out.println("\n============================================\n");
-            //Retrieve the service request from the socket
+    public void run() {
+        System.out.println("\n============================================\n");
+    
+        try {
+            // Retrieve the service request from the socket
             this.retrieveRequest();
             System.out.println("Service thread " + this.getId() + ": Request retrieved: "
-						+ "artist->" + this.requestStr[0] + "; recordshop->" + this.requestStr[1]);
-
-            //Attend the request
-            boolean tmp = this.attendRequest();
-
-            //Send back the outcome of the request
-            if (!tmp)
-                System.out.println("Service thread " + this.getId() + ": Unable to provide service.");
-            this.returnServiceOutcome();
-
-        }catch (Exception e){
-            System.out.println("Service thread " + this.getId() + ": " + e);
+                    + "firstName->" + this.requestStr[0] + "; lastName->" + this.requestStr[1]);
+    
+            // Attend the request and execute the database query
+            boolean isRequestSuccessful = this.attendRequest();
+    
+            if (isRequestSuccessful) {
+                // Send back the query outcome
+                this.returnServiceOutcome();
+            } else {
+                System.out.println("Service thread " + this.getId() + ": Unable to process the request successfully.");
+            }
+    
+        } catch (Exception e) {
+            System.err.println("Service thread " + this.getId() + ": Unexpected error occurred: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (this.serviceSocket != null && !this.serviceSocket.isClosed()) {
+                    this.serviceSocket.close();
+                    System.out.println("Service thread " + this.getId() + ": Connection closed.");
+                }
+            } catch (IOException e) {
+                System.err.println("Service thread " + this.getId() + ": Error while closing socket: " + e.getMessage());
+            }
         }
-        //Terminate service thread (by exiting run() method)
+    
         System.out.println("Service thread " + this.getId() + ": Finished service.");
     }
 

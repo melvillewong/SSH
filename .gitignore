@@ -34,3 +34,4 @@ build/
 # Temporary files created by editors or operating systems
 *.swp
 *.tmp
+.DS_Store

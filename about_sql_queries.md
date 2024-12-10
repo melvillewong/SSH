@@ -17,8 +17,8 @@ WITH resident_presence AS (
 ),
 zero_to_one_transitions AS (
     SELECT 
-        r1.timestamp AS start_time, 
-        r2.timestamp AS end_time
+        r1.timestamp AS start_timestamp, 
+        r2.timestamp AS end_timestamp
     FROM resident_presence r1
     JOIN resident_presence r2
     ON r1.timestamp < r2.timestamp
@@ -30,9 +30,9 @@ zero_to_one_transitions AS (
     )
 )
 INSERT INTO total_hour_suggestions (resident_id, start_timestamp, end_timestamp)
-SELECT 0 AS resident_id, start_time, end_time
+SELECT 0 AS resident_id, start_timestamp, end_timestamp
 FROM zero_to_one_transitions
-ORDER BY start_time;
+ORDER BY start_timestamp;
 ```
 
 - This is a SQL query that insert the list of timestamps for residents where such resident is alone at the household by himself/herself into the table of total_hour_suggestions, with resident_id set to the relevant resident
@@ -64,7 +64,7 @@ filtered_periods AS (
     WHERE net_presence = 1 
       AND (next_net_presence IS DISTINCT FROM 1 OR next_net_presence IS NULL)
 )
-INSERT INTO total_hour_suggestions (resident_id, start_timestamp, end_timestamp)
+--INSERT INTO total_hour_suggestions (resident_id, start_timestamp, end_timestamp)
 SELECT resident_id, start_timestamp, end_timestamp
 FROM filtered_periods
 WHERE end_timestamp IS NOT NULL
@@ -133,7 +133,7 @@ ORDER BY start_timestamp;
 
 - First SQL query output (Occupancy = 0) where nobody is at the household. (This output has yet to be inserted)
 
-| resident_id |      start_time      |       end_time       |
+| resident_id |   start_timestamp    |     end_timestamp    |
 |-------------|----------------------|----------------------|
 |      0      | 2024-12-03 15:29:36 | 2024-12-03 17:15:12   |
 |      0      | 2024-12-06 07:43:47 | 2024-12-06 08:52:15   |
