@@ -120,8 +120,8 @@ public class RecordsDatabaseService extends Thread{
                 ts.start_timestamp, 
                 ts.end_timestamp, 
                 CASE 
-                    WHEN ts.resident_id = 0 THEN 'Occupancy = 0'
-                    ELSE 'Solo Time'
+                    WHEN ts.resident_id = 0 THEN 'Empty'
+                    ELSE 'Solo'
                 END AS status
             FROM total_hour_suggestions ts
             WHERE ts.resident_id = 0 

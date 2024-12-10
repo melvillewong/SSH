@@ -150,3 +150,12 @@ ORDER BY start_timestamp;
 |      2      | 2024-12-06 07:03:38 | 2024-12-06 07:43:47   |
 |      1      | 2024-12-06 08:52:15 | 2024-12-06 09:37:26   |
 (6 rows)
+
+```sql
+INSERT INTO residents (firstName, lastName) VALUES
+('Anson', 'Lo'),
+('Bruno', 'Mars'),
+('Charlie', 'Puth'),
+('Doja', 'Cat'),
+('John', 'Cena');
+```
