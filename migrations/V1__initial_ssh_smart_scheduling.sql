@@ -1,44 +1,5 @@
 -- SSH Smart Scheduling Assistant Database
--- File: ssh_smart_scheduling.sql
-
--- WITH resident_presence AS (SELECT timestamp, action, SUM(CASE WHEN action = 'enter' THEN 1 ELSE -1 END) OVER (ORDER BY timestamp) AS net_presence FROM access_log), empty_periods AS (SELECT timestamp AS start_time, LEAD(timestamp) OVER (ORDER BY timestamp) AS end_time FROM resident_presence WHERE net_presence = 0) SELECT start_time, end_time FROM empty_periods WHERE end_time IS NOT NULL;
-
--- Below is the SQL query for finding the start_time and end_time of the empty period where no residents are present in the household
---
--- WITH resident_presence AS (
---     SELECT 
---         timestamp, 
---         action, 
---         SUM(CASE WHEN action = 'enter' THEN 1 ELSE -1 END) 
---         OVER (ORDER BY timestamp) AS net_presence
---     FROM access_log
--- ),
--- zero_to_one_transitions AS (
---     SELECT 
---         r1.timestamp AS start_time, 
---         r2.timestamp AS end_time
---     FROM resident_presence r1
---     JOIN resident_presence r2
---     ON r1.timestamp < r2.timestamp
---     WHERE r1.net_presence = 0 AND r2.net_presence = 1
---     AND NOT EXISTS (
---         SELECT 1 
---         FROM resident_presence r3
---         WHERE r3.timestamp > r1.timestamp AND r3.timestamp < r2.timestamp AND r3.net_presence != 0
---     )
--- )
--- SELECT start_time, end_time
--- FROM zero_to_one_transitions
--- ORDER BY start_time;
---
---
--- The result is returned below
---
---      start_time      |      end_time       
--- ---------------------+---------------------
---  2024-12-03 15:29:36 | 2024-12-03 17:15:12
---  2024-12-06 07:43:47 | 2024-12-06 08:52:15
--- (2 rows)
+-- File: V1__initial_ssh_smart_scheduling.sql
 
 ---------------------------------------------------------
 -- Define ENUM types
@@ -66,25 +27,9 @@ CREATE TABLE chores_log (
     action chore_action NOT NULL
 );
 
+-- Create the 'total_hour_suggestions' table
 CREATE TABLE total_hour_suggestions (
     resident_id INT NOT NULL,
-    start_timestamp TIMESTAMP NOT NULL,
-    end_timestamp TIMESTAMP NOT NULL
-);
-
--- Create the 'alone_hour_suggestions' table
-CREATE TABLE alone_hour_suggestions (
-    hour_id SERIAL PRIMARY KEY,
-    resident_id INT NOT NULL,
-    start_timestamp TIMESTAMP NOT NULL,
-    end_timestamp TIMESTAMP NOT NULL
-);
-
--- Create the 'chore_shift_suggestions' table
-CREATE TABLE chore_shift_suggestions (
-    chore_id SERIAL PRIMARY KEY,
-    resident_id INT NOT NULL,
-    chore_type VARCHAR(50) NOT NULL,
     start_timestamp TIMESTAMP NOT NULL,
     end_timestamp TIMESTAMP NOT NULL
 );
@@ -219,19 +164,3 @@ INSERT INTO chores_log (chore_id, resident_id, chore_type, timestamp, action) VA
 (50, 1, 'Laundry', '2024-12-08 10:05:40', 'finish'),
 (51, 2, 'Gardening', '2024-12-08 10:20:15', 'start'),
 (52, 2, 'Gardening', '2024-12-08 10:50:00', 'finish');
-
--- -- Populate 'alone_hour_suggestions' table
--- INSERT INTO alone_hour_suggestions (resident_id, start_timestamp, end_timestamp) VALUES
--- (1, '2024-12-01 09:00:00', '2024-12-01 10:00:00'),
--- (2, '2024-12-01 09:30:00', '2024-12-01 10:30:00'),
--- (3, '2024-12-01 12:00:00', '2024-12-01 13:00:00'),
--- (4, '2024-12-01 08:45:00', '2024-12-01 09:15:00'),
--- (5, '2024-12-01 13:00:00', '2024-12-01 14:00:00');
-
--- -- Populate 'chore_shift_suggestions' table
--- INSERT INTO chore_shift_suggestions (resident_id, chore_type, start_timestamp, end_timestamp) VALUES
--- (1, 'Dishwashing', '2024-12-01 08:15:00', '2024-12-01 08:30:00'),
--- (2, 'Vacuuming', '2024-12-01 08:45:00', '2024-12-01 09:00:00'),
--- (3, 'Laundry', '2024-12-01 10:15:00', '2024-12-01 11:30:00'),
--- (4, 'Cooking', '2024-12-01 08:20:00', '2024-12-01 08:40:00'),
--- (5, 'Gardening', '2024-12-01 11:15:00', '2024-12-01 12:45:00');
