@@ -1,7 +1,6 @@
 # General data and environment files
 data/
 *.env
-java-temp/Credentials.java
 
 # IDE-specific files
 .idea/
