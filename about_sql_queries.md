@@ -1,6 +1,5 @@
 ## Following are the queries planned to be used
 
-<\h2>Chore Shift Duration Recommendation<h2> 
 - This is a SQL query that returns the list of number of residents present in the house for every change in the 'enter' and 'leave' state
 ```sql
 SELECT resident_id, timestamp, action, SUM(CASE WHEN action = 'enter' THEN 1 ELSE -1 END) OVER (ORDER BY timestamp) AS net_presence FROM access_log;
