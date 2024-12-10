@@ -67,7 +67,7 @@ public class TerminalRecordsClient {
                     return;
                 }
 
-                this.serviceOutcome.beforeFirst(); // Reset cursor
+                this.serviceOutcome.beforeFirst();
                 while (this.serviceOutcome.next()) {
                     System.out.printf(
                         "Resident ID: %d | Start Time: %s | End Time: %s | Status: %s%n",

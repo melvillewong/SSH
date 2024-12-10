@@ -47,7 +47,6 @@ public class RecordsDatabaseServer {
         try {
             //Service loop
             while (true) {
-
                 Socket socket = this.serverSocket.accept();
                 new RecordsDatabaseService(socket);
             }

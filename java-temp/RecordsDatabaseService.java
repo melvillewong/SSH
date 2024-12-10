@@ -55,8 +55,6 @@ public class RecordsDatabaseService extends Thread{
 
     //Class constructor
     public RecordsDatabaseService(Socket aSocket){
-        
-		//TO BE COMPLETED
         serviceSocket = aSocket;
         runSqlScript("autorun_total_hour_suggestion.sql");
         System.out.println("SQL script executed and database state verified.");
@@ -141,23 +139,6 @@ public class RecordsDatabaseService extends Thread{
             CachedRowSet crs = rowSetFactory.createCachedRowSet();
             crs.populate(rs);
             this.outcome = crs;
-
-            // if (!crs.next()) {
-            //     System.out.println("No data found in CachedRowSet after population.");
-            // } else {
-            //     System.out.println("Data found in CachedRowSet:");
-            //     crs.beforeFirst(); // Reset cursor
-            //     while (crs.next()) {
-            //         System.out.println(
-            //                 "Title: " + crs.getString("title") +
-            //                         " | Label: " + crs.getString("label") +
-            //                         " | Genre: " + crs.getString("genre") +
-            //                         " | RRP: " + crs.getDouble("rrp") +
-            //                         " | Copies: " + crs.getInt("copies")
-            //         );
-            //     }
-            //     crs.beforeFirst(); // Reset for client
-            // }
         } catch (SQLException e) {
             System.err.println("Database error: " + e.getMessage());
             e.printStackTrace();
@@ -220,7 +201,6 @@ public class RecordsDatabaseService extends Thread{
             boolean isRequestSuccessful = this.attendRequest();
     
             if (isRequestSuccessful) {
-                // Send back the query outcome
                 this.returnServiceOutcome();
             } else {
                 System.out.println("Service thread " + this.getName() + ": Unable to process the request successfully.");
