@@ -67,15 +67,47 @@ public class TerminalRecordsClient {
                     return;
                 }
 
+                StringBuilder statusRecords = new StringBuilder("== Status Records ==\n");
+                StringBuilder choreRecords = new StringBuilder("== Chore Suggestions ==\n");
+                boolean hasStatusRecords = false;
+                boolean hasChoreRecords = false;
+
                 this.serviceOutcome.beforeFirst();
                 while (this.serviceOutcome.next()) {
-                    System.out.printf(
-                        "Resident ID: %d | Start Time: %s | End Time: %s | Status: %s%n",
-                        this.serviceOutcome.getInt("resident_id"),
-                        this.serviceOutcome.getTimestamp("start_timestamp"),
-                        this.serviceOutcome.getTimestamp("end_timestamp"),
-                        this.serviceOutcome.getString("status")
-                    );
+                    // Check the status to differentiate between solo time and chore suggestions
+                    String status = this.serviceOutcome.getString("status");
+                    if ("Solo".equals(status) || "Empty".equals(status)) {
+                        // Add to status records
+                        statusRecords.append(String.format(
+                            "Resident ID: %d | Status: %s | Start Time: %s | End Time: %s%n",
+                            this.serviceOutcome.getInt("resident_id"),
+                            status,
+                            this.serviceOutcome.getTimestamp("start_timestamp"),
+                            this.serviceOutcome.getTimestamp("end_timestamp")
+                        ));
+                        hasStatusRecords = true;
+                    } else {
+                        // Add to chore suggestion records
+                        choreRecords.append(String.format(
+                            "Resident ID: %d | Chore Type: %s | Start Time: %s | End Time: %s%n",
+                            this.serviceOutcome.getInt("resident_id"),
+                            this.serviceOutcome.getString("chore_type"),
+                            this.serviceOutcome.getTimestamp("start_timestamp"),
+                            this.serviceOutcome.getTimestamp("end_timestamp")
+                        ));
+                        hasChoreRecords = true;
+                    }
+                }
+                if (hasStatusRecords) {
+                    System.out.println(statusRecords);
+                } else {
+                    System.out.println("No status records found.");
+                }
+    
+                if (hasChoreRecords) {
+                    System.out.println(choreRecords);
+                } else {
+                    System.out.println("No chore suggestion records found.");
                 }
             } catch (SQLException e) {
                 System.out.println("Client: Error processing CachedRowSet: " + e.getMessage());
