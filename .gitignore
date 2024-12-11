@@ -28,7 +28,7 @@ build/
 # Gradle wrapper files (keep these if we use Gradle wrapper)
 !gradlew
 !gradlew.bat
-!gradle/wrapper/
+!gradle/wrapper/*
 
 # Temporary files created by editors or operating systems
 *.swp
