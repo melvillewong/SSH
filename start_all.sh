@@ -18,7 +18,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Starting RecordsDatabaseServer..."
-java -cp java-temp RecordsDatabaseServer &
+java -cp "java-temp:java-temp/lib/postgresql-42.6.0.jar" RecordsDatabaseServer &
 SERVER_PID=$!
 echo "RecordsDatabaseServer started with PID $SERVER_PID"
 
@@ -27,14 +27,14 @@ echo "Automating input for TerminalRecordsClient..."
   echo "Anson"  # First Name
   sleep 1       # Pause to simulate real typing (optional)
   echo "Lo"     # Last Name
-) | java -cp java-temp TerminalRecordsClient &
+) | java -cp "java-temp:java-temp/lib/postgresql-42.6.0.jar" TerminalRecordsClient &
 CLIENT_PID=$!
 echo "TerminalRecordsClient started with PID $CLIENT_PID"
 sleep 2
 
 echo "Cleaning up..."
 wait $CLIENT_PID
-wait $SERVER_PID
+kill $SERVER_PID
 docker-compose down
 
 echo "Process complete!"

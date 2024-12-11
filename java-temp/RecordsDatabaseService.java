@@ -56,7 +56,8 @@ public class RecordsDatabaseService extends Thread{
     //Class constructor
     public RecordsDatabaseService(Socket aSocket){
         serviceSocket = aSocket;
-        runSqlScript("autorun_total_hour_suggestion.sql");
+        runSqlScript("java-temp/out/production/autorun_chore_hour_suggestion.sql");
+        runSqlScript("java-temp/autorun_total_hour_suggestion.sql");
         System.out.println("SQL script executed and database state verified.");
         this.start();
     }
@@ -106,25 +107,73 @@ public class RecordsDatabaseService extends Thread{
         boolean flagRequestAttended = true;
 		
 		this.outcome = null;
-		
-		String sql = """
+
+		// String sql = """
+        //    WITH selected_resident AS (
+        //        SELECT resident_id
+        //        FROM residents
+        //        WHERE firstName = ? AND lastName = ?
+        //    )
+        //    SELECT
+        //        ts.resident_id,
+        //        ts.chore_type,
+        //        ts.start_timestamp,
+        //        ts.end_timestamp,
+        //    FROM chore_hour_suggestions ts
+        //    WHERE ts.resident_id = (SELECT resident_id FROM selected_resident)
+        //    ORDER BY ts.resident_id;
+        //    """;
+        // String sql = """
+        //     WITH selected_resident AS (
+        //         SELECT resident_id
+        //         FROM residents
+        //         WHERE firstName = ? AND lastName = ?
+        //     )
+        //     SELECT 
+        //         ts.resident_id, 
+        //         ts.chore_type,
+        //         ts.start_timestamp, 
+        //         ts.end_timestamp
+        //     FROM chore_hours_suggestions ts
+        //     WHERE ts.resident_id = (SELECT resident_id FROM selected_resident)
+        //     ORDER BY ts.resident_id;
+        //     """;
+        String sql = """
             WITH selected_resident AS (
                 SELECT resident_id
                 FROM residents
                 WHERE firstName = ? AND lastName = ?
+            ),
+            solo_time AS (
+                SELECT 
+                    ts.resident_id, 
+                    ts.start_timestamp, 
+                    ts.end_timestamp, 
+                    CASE 
+                        WHEN ts.resident_id = 0 THEN 'Empty'
+                        ELSE 'Solo'
+                    END AS status,
+                    NULL::TEXT AS chore_type -- Placeholder for union compatibility
+                FROM total_hour_suggestions ts
+                WHERE ts.resident_id = 0 
+                OR ts.resident_id = (SELECT resident_id FROM selected_resident)
+            ),
+            chore_suggestions AS (
+                SELECT 
+                    ts.resident_id, 
+                    ts.start_timestamp, 
+                    ts.end_timestamp, 
+                    'Chore' AS status, -- Label to distinguish chore suggestions
+                    ts.chore_type
+                FROM chore_hours_suggestions ts
+                WHERE ts.resident_id = (SELECT resident_id FROM selected_resident)
             )
-            SELECT 
-                ts.resident_id, 
-                ts.start_timestamp, 
-                ts.end_timestamp, 
-                CASE 
-                    WHEN ts.resident_id = 0 THEN 'Empty'
-                    ELSE 'Solo'
-                END AS status
-            FROM total_hour_suggestions ts
-            WHERE ts.resident_id = 0 
-            OR ts.resident_id = (SELECT resident_id FROM selected_resident)
-            ORDER BY ts.start_timestamp;
+            SELECT *
+            FROM solo_time
+            UNION ALL
+            SELECT *
+            FROM chore_suggestions
+            ORDER BY resident_id, start_timestamp;
             """;
 
         try (Connection con = DriverManager.getConnection(URL, USERNAME, PASSWORD);
