@@ -1,36 +1,24 @@
 ## Future development
-+ Script for Server.java, Service.java, Client.java (Sample currently)
 + Detailed description here
 + Implement test
 
-## Run Server and Client (Sample)
-1. `./gradlew :app:server:run` to run server
-2. Open a new terminal, `./gradlew :app:client:run` to run client
+## Run Server and Client
+1. Ensure Docker Desktop is running.
+2. `./gradlew clean build` to delete all builded files and rebuild all from clean.
+3. `./gradlew :app:server:run` to create container, and run the server.
+4. Open a new terminal, `java -jar app/client/build/libs/client-1.0.0.jar` to run client.
 
-Server-side
+client-side
 ```
-❯ ./gradlew :app:server:run
-Reusing configuration cache.
-
-> Task :app:server:run
-Server is listening on port 12345...
-New client connected
-Received from client: Hello, Server!
-<===========--> 87% EXECUTING [24s]
-> :app:server:run
-```
-Client-side
-```
-❯ ./gradlew :app:client:run
-Starting a Gradle Daemon, 1 busy and 2 incompatible and 3 stopped Daemons could not be reused, use --status for details
-Reusing configuration cache.
-
-> Task :app:client:run
-Response from server: Service processed message: !revreS ,olleH
-
-BUILD SUCCESSFUL in 4s
-2 actionable tasks: 2 executed
-Configuration cache entry reused.
+❯ java -jar app/client/build/libs/client-1.0.0.jar
+Enter Resident's First Name: John
+Enter Resident's Last Name: Cena
+Connecting to 127.0.0.1 on port 9994
+Client: Requesting records database service for user command
+John;Cena
+Client: Processing CachedRowSet...
+Resident ID: 0 | Start Time: 2024-12-03 15:29:36.0 | End Time: 2024-12-03 17:15:12.0 | Status: Empty
+Resident ID: 0 | Start Time: 2024-12-06 07:43:47.0 | End Time: 2024-12-06 08:52:15.0 | Status: Empty
 ```
 
 ## Key files

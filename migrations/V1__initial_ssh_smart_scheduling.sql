@@ -1,5 +1,5 @@
 -- SSH Smart Scheduling Assistant Database
--- File: ssh_smart_scheduling.sql
+-- File: V1__initial_ssh_smart_scheduling.sql
 
 ---------------------------------------------------------
 -- Define ENUM types
@@ -10,6 +10,13 @@ CREATE TYPE chore_action AS ENUM ('start', 'finish');
 ---------------------------------------------------------
 -- Tables creation
 ---------------------------------------------------------
+-- Create the 'residents' table
+CREATE TABLE residents (
+    resident_id SERIAL PRIMARY KEY,
+    firstName VARCHAR(50) NOT NULL,
+    lastName VARCHAR(50) NOT NULL
+);
+
 -- Create the 'access_log' table
 CREATE TABLE access_log (
     access_id SERIAL PRIMARY KEY,
@@ -27,19 +34,9 @@ CREATE TABLE chores_log (
     action chore_action NOT NULL
 );
 
--- Create the 'alone_hour_suggestions' table
-CREATE TABLE alone_hour_suggestions (
-    hour_id SERIAL PRIMARY KEY,
+-- Create the 'total_hour_suggestions' table
+CREATE TABLE total_hour_suggestions (
     resident_id INT NOT NULL,
-    start_timestamp TIMESTAMP NOT NULL,
-    end_timestamp TIMESTAMP NOT NULL
-);
-
--- Create the 'chore_shift_suggestions' table
-CREATE TABLE chore_shift_suggestions (
-    chore_id SERIAL PRIMARY KEY,
-    resident_id INT NOT NULL,
-    chore_type VARCHAR(50) NOT NULL,
     start_timestamp TIMESTAMP NOT NULL,
     end_timestamp TIMESTAMP NOT NULL
 );
@@ -47,6 +44,14 @@ CREATE TABLE chore_shift_suggestions (
 ---------------------------------------------------------
 -- Data population
 ---------------------------------------------------------
+-- Populate 'residents' table
+INSERT INTO residents (firstName, lastName) VALUES
+('Anson', 'Lo'),
+('Bruno', 'Mars'),
+('Charlie', 'Puth'),
+('Doja', 'Cat'),
+('John', 'Cena');
+
 -- Populate 'access_log' table
 INSERT INTO access_log (access_id, resident_id, timestamp, action) VALUES
 -- Day 1: Monday
@@ -64,7 +69,7 @@ INSERT INTO access_log (access_id, resident_id, timestamp, action) VALUES
 (11, 3, '2024-12-03 08:19:47', 'enter'),
 (12, 4, '2024-12-03 09:23:31', 'leave'),
 (13, 1, '2024-12-03 10:17:42', 'leave'),
-(14, 5, '2024-12-03 12:43:18', 'enter'),
+(14, 5, '2024-12-03 12:43:18', 'leave'),
 (15, 2, '2024-12-03 13:09:51', 'leave'),
 (16, 3, '2024-12-03 15:29:36', 'leave'),
 (17, 4, '2024-12-03 17:15:12', 'enter'),
@@ -83,7 +88,7 @@ INSERT INTO access_log (access_id, resident_id, timestamp, action) VALUES
 (28, 2, '2024-12-05 07:29:58', 'enter'),
 (29, 3, '2024-12-05 08:14:32', 'enter'),
 (30, 4, '2024-12-05 08:39:03', 'leave'),
-(31, 5, '2024-12-05 10:34:14', 'enter'),
+(31, 5, '2024-12-05 10:34:14', 'leave'),
 (32, 1, '2024-12-05 12:12:07', 'leave'),
 -- Day 5: Friday
 (33, 2, '2024-12-06 07:03:38', 'leave'),
@@ -108,7 +113,7 @@ INSERT INTO access_log (access_id, resident_id, timestamp, action) VALUES
 (50, 4, '2024-12-08 08:11:34', 'leave'),
 (51, 1, '2024-12-08 09:33:47', 'enter'),
 (52, 2, '2024-12-08 10:18:22', 'leave'),
-(53, 5, '2024-12-08 12:00:49', 'leave'),
+(53, 5, '2024-12-08 12:00:49', 'enter'),
 (54, 4, '2024-12-08 13:49:21', 'enter'),
 (55, 3, '2024-12-08 15:35:04', 'leave'),
 (56, 2, '2024-12-08 17:42:58', 'enter');
@@ -174,19 +179,3 @@ INSERT INTO chores_log (chore_id, resident_id, chore_type, timestamp, action) VA
 (50, 1, 'Laundry', '2024-12-08 10:05:40', 'finish'),
 (51, 2, 'Gardening', '2024-12-08 10:20:15', 'start'),
 (52, 2, 'Gardening', '2024-12-08 10:50:00', 'finish');
-
--- -- Populate 'alone_hour_suggestions' table
--- INSERT INTO alone_hour_suggestions (resident_id, start_timestamp, end_timestamp) VALUES
--- (1, '2024-12-01 09:00:00', '2024-12-01 10:00:00'),
--- (2, '2024-12-01 09:30:00', '2024-12-01 10:30:00'),
--- (3, '2024-12-01 12:00:00', '2024-12-01 13:00:00'),
--- (4, '2024-12-01 08:45:00', '2024-12-01 09:15:00'),
--- (5, '2024-12-01 13:00:00', '2024-12-01 14:00:00');
-
--- -- Populate 'chore_shift_suggestions' table
--- INSERT INTO chore_shift_suggestions (resident_id, chore_type, start_timestamp, end_timestamp) VALUES
--- (1, 'Dishwashing', '2024-12-01 08:15:00', '2024-12-01 08:30:00'),
--- (2, 'Vacuuming', '2024-12-01 08:45:00', '2024-12-01 09:00:00'),
--- (3, 'Laundry', '2024-12-01 10:15:00', '2024-12-01 11:30:00'),
--- (4, 'Cooking', '2024-12-01 08:20:00', '2024-12-01 08:40:00'),
--- (5, 'Gardening', '2024-12-01 11:15:00', '2024-12-01 12:45:00');

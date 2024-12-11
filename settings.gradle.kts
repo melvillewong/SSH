@@ -11,4 +11,4 @@ plugins {
 }
 
 rootProject.name = "SSH"
-include("app:client", "app:server", "app:service")
+include("app:client", "app:server", "app:service", "app:common")

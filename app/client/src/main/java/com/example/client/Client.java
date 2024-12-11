@@ -1,49 +1,131 @@
 package com.example.client;
 
+import com.example.common.Credentials;
+
 import java.io.*;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.sql.SQLException;
+import javax.sql.rowset.CachedRowSet;
 
-public class Client implements AutoCloseable {
-    private final Socket socket;
-    private final PrintWriter out;
-    private final BufferedReader in;
+public class Client {
 
-    // Constructor for testing or custom Socket
-    public Client(Socket socket) throws IOException {
-        this.socket = socket;
-        this.out = new PrintWriter(socket.getOutputStream(), true);
-        this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-    }
+    private Socket clientSocket = null;
+    private String userCommand = null; // The user command
+    private CachedRowSet serviceOutcome = null; // The service outcome
 
-    // Default constructor for actual use
-    public Client(String host, int port) throws IOException {
-        this(new Socket(host, port));
-    }
+    // Constructor
+    public Client() {}
 
-    public String sendMessage(String message) throws IOException {
-        if (message == null || message.isEmpty()) {
-            throw new IllegalArgumentException("Message cannot be null or empty");
-        }
-        out.println(message);
-        return in.readLine();
-    }
-
-    @Override
-    public void close() throws IOException {
+    // Initializes the client socket using the credentials from the Credentials class.
+    public void initializeSocket() {
         try {
-            in.close();
-            out.close();
-        } finally {
-            socket.close();
+            System.out.println("Connecting to " + Credentials.HOST + " on port " + Credentials.PORT);
+            this.clientSocket = new Socket(Credentials.HOST, Credentials.PORT);
+        } catch (UnknownHostException e) {
+            System.out.println("Client: Unknown host. " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("Client: Unable to connect to server. " + e.getMessage());
         }
     }
 
-    public static void main(String[] args) {
-        try (Client client = new Client("localhost", 12345)) {
-            String response = client.sendMessage("Hello, Server!");
-            System.out.println("Response from server: " + response);
-        } catch (IOException e) {
-            System.err.println("Error: " + e.getMessage());
+    // Sends the user command to the server
+    public void requestService() {
+        if (this.clientSocket == null) {
+            System.out.println("Client: Connection failed. Unable to send request.");
+            return;
         }
+
+        try {
+            System.out.println("Client: Requesting records database service for user command\n" + this.userCommand);
+            OutputStream requestStream = this.clientSocket.getOutputStream();
+            OutputStreamWriter requestStreamWriter = new OutputStreamWriter(requestStream);
+            requestStreamWriter.write(userCommand + "#");
+            requestStreamWriter.flush();
+        } catch (IOException e) {
+            System.out.println("Client: I/O error while sending request. " + e.getMessage());
+        }
+    }
+
+    // Processes and prints the server's response
+    public void reportServiceOutcome() {
+        if (this.clientSocket == null) {
+            System.out.println("Client: Connection failed. Unable to process outcome.");
+            return;
+        }
+
+        try {
+            InputStream outcomeStream = clientSocket.getInputStream();
+            ObjectInputStream outcomeStreamReader = new ObjectInputStream(outcomeStream);
+            serviceOutcome = (CachedRowSet) outcomeStreamReader.readObject();
+
+            if (this.serviceOutcome == null) {
+                System.out.println("Client: Received null CachedRowSet from server.");
+                return;
+            }
+
+            try {
+                System.out.println("Client: Processing CachedRowSet...");
+                if (!this.serviceOutcome.next()) {
+                    System.out.println("Client: No records found in CachedRowSet.");
+                    return;
+                }
+
+                this.serviceOutcome.beforeFirst();
+                while (this.serviceOutcome.next()) {
+                    System.out.printf(
+                        "Resident ID: %d | Start Time: %s | End Time: %s | Status: %s%n",
+                        this.serviceOutcome.getInt("resident_id"),
+                        this.serviceOutcome.getTimestamp("start_timestamp"),
+                        this.serviceOutcome.getTimestamp("end_timestamp"),
+                        this.serviceOutcome.getString("status")
+                    );
+                }
+            } catch (SQLException e) {
+                System.out.println("Client: Error processing CachedRowSet: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } catch (IOException e) {
+            System.out.println("Client: I/O error while processing outcome. " + e.getMessage());
+        } catch (ClassNotFoundException e) {
+            System.out.println("Client: Unable to cast response to CachedRowSet. " + e.getMessage());
+        }
+    }
+
+    // Executes the client operations
+    public void execute() {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+            // Get user input
+            System.out.print("Enter Resident's First Name: ");
+            String firstName = reader.readLine();
+
+            System.out.print("Enter Resident's Last Name: ");
+            String lastName = reader.readLine();
+
+            // Build user message command
+            userCommand = firstName + ";" + lastName;
+
+            // Initialize the socket
+            this.initializeSocket();
+
+            // Request service
+            this.requestService();
+
+            // Report service outcome
+            this.reportServiceOutcome();
+
+            // Close the connection with the server
+            if (this.clientSocket != null) {
+                this.clientSocket.close();
+            }
+        } catch (IOException e) {
+            System.out.println("Client: Exception occurred during execution. " + e.getMessage());
+        }
+    }
+
+    // Main method
+    public static void main(String[] args) {
+        Client client = new Client();
+        client.execute();
     }
 }

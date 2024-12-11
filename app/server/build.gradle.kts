@@ -8,7 +8,7 @@ application {
 
 dependencies {
     implementation(project(":app:service"))
-    // implementation("org.postgresql:postgresql:42.5.0")                  // PostgreSQL JDBC driver
+    implementation(project(":app:common"))
 }
 
 // Docker

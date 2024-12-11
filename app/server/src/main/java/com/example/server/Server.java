@@ -1,67 +1,74 @@
 package com.example.server;
 
 import com.example.service.Service;
+import com.example.common.Credentials;
 
-import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.ServerSocket;
+import java.net.InetAddress;
 
 public class Server {
-    private static final int PORT = 12345;
-    private ServerSocket serverSocket;
-    private boolean running = false;
 
-    public void startServer() throws IOException {
-        serverSocket = new ServerSocket(PORT);
-        running = true;
-        System.out.println("Server is listening on port " + PORT + "...");
+    private int thePort = 0;
+    private String theIPAddress = null;
+    private ServerSocket serverSocket =  null;
 
-        while (running) {
-            try (Socket socket = serverSocket.accept()) {
-                System.out.println("New client connected");
+    //Support for closing the server
+    //private boolean keypressedFlag = false;
 
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+    //Class constructor
+    public Server(){
+        //Initialize the TCP socket
+        thePort = Credentials.PORT;
+        theIPAddress = Credentials.HOST;
 
-                String clientMessage = in.readLine();
-                System.out.println("Received from client: " + clientMessage);
-
-                String response = Service.processMessage(clientMessage);
-                out.println(response);
-            } catch (IOException e) {
-                if (running) {
-                    System.err.println("Error handling client: " + e.getMessage());
-                } else {
-                    System.out.println("Server is shutting down...");
-                }
-            }
-        }
-    }
-
-    public void stopServer() throws IOException {
-        running = false;
-        if (serverSocket != null && !serverSocket.isClosed()) {
-            serverSocket.close();
-        }
-        System.out.println("Server stopped.");
-    }
-
-    public static void main(String[] args) {
-        Server server = new Server();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                server.stopServer();
-            } catch (IOException e) {
-                System.err.println("Error during server shutdown: " + e.getMessage());
-            }
-        }));
-
+        //Initialize the socket and runs the service loop
+        System.out.println("Server: Initializing server socket at " + theIPAddress + " with listening port " + thePort);
+        System.out.println("Server: Exit server application by pressing Ctrl+C (Windows or Linux) or Opt-Cmd-Shift-Esc (Mac OSX)." );
         try {
-            server.startServer();
-        } catch (IOException e) {
-            System.err.println("Server failed: " + e.getMessage());
+            //Initialize the socket
+            serverSocket = new ServerSocket(thePort, 10, InetAddress.getByName(theIPAddress));
+            System.out.println("Server: Server at " + theIPAddress + " is listening on port : " + thePort);
+        } catch (Exception e){
+            //The creation of the server socket can cause several exceptions;
+            //See https://docs.oracle.com/javase/7/docs/api/java/net/ServerSocket.html
+            System.out.println(e);
+            System.exit(1);
         }
+    }
+
+    //Runs the service loop
+    public void executeServiceLoop()
+    {
+        System.out.println("Server: Start service loop.");
+        try {
+            //Service loop
+            while (true) {
+                Socket socket = this.serverSocket.accept();
+                new Service(socket);
+            }
+        } catch (Exception e){
+            //The creation of the server socket can cause several exceptions;
+            //See https://docs.oracle.com/javase/7/docs/api/java/net/ServerSocket.html
+            System.out.println(e);
+        }
+        System.out.println("Server: Finished service loop.");
+    }
+
+/*
+	@Override
+	protected void finalize() {
+		//If this server has to be killed by the launcher with destroyForcibly
+		//make sure we also kill the service threads.
+		System.exit(0);
+	}
+*/
+
+    public static void main(String[] args){
+        //Run the server
+        Server server=new Server(); //inc. Initializing the socket
+        server.executeServiceLoop();
+        System.out.println("Server: Finished.");
+        System.exit(0);
     }
 }
-
- 
