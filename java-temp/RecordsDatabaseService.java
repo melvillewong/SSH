@@ -56,7 +56,7 @@ public class RecordsDatabaseService extends Thread{
     //Class constructor
     public RecordsDatabaseService(Socket aSocket){
         serviceSocket = aSocket;
-        runSqlScript("autorun_total_hour_suggestion.sql");
+        runSqlScript("autorun_chore_hour_suggestion.sql");
         System.out.println("SQL script executed and database state verified.");
         this.start();
     }
@@ -115,16 +115,12 @@ public class RecordsDatabaseService extends Thread{
             )
             SELECT 
                 ts.resident_id, 
+                ts.chore_type,
                 ts.start_timestamp, 
                 ts.end_timestamp, 
-                CASE 
-                    WHEN ts.resident_id = 0 THEN 'Empty'
-                    ELSE 'Solo'
-                END AS status
-            FROM total_hour_suggestions ts
-            WHERE ts.resident_id = 0 
-            OR ts.resident_id = (SELECT resident_id FROM selected_resident)
-            ORDER BY ts.start_timestamp;
+            FROM chore_hour_suggestions ts
+            WHERE ts.resident_id = (SELECT resident_id FROM selected_resident)
+            ORDER BY ts.resident_id;
             """;
 
         try (Connection con = DriverManager.getConnection(URL, USERNAME, PASSWORD);
