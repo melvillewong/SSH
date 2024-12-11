@@ -75,5 +75,5 @@ SELECT
     resident_id, 
     chore_type, 
     start_timestamp, 
-    end_timestamp
-FROM chore_hour_suggestions; 
+    suggested_end_timestamp
+FROM chore_hours_suggestions;
