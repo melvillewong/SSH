@@ -73,7 +73,13 @@ chore_hours_suggestions AS (
         ON presence.resident_id = chore.resident_id
 )
 
-SELECT * FROM chore_hours_suggestions;
+INSERT INTO chore_shift_suggestions (resident_id, chore_type, start_timestamp, end_timestamp)
+SELECT 
+    resident_id, 
+    chore_type, 
+    start_timestamp, 
+    suggested_end_timestamp
+FROM chore_hours_suggestions;
 ```
 
 ## Chore Shift Duration Calculation
@@ -230,6 +236,13 @@ chore_hours_suggestions AS (
     JOIN avg_duration_chore chore
         ON presence.resident_id = chore.resident_id
 )
+INSERT INTO chore_shift_suggestions (resident_id, chore_type, start_timestamp, end_timestamp)
+SELECT 
+    resident_id, 
+    chore_type, 
+    start_timestamp, 
+    suggested_end_timestamp
+FROM chore_hours_suggestions;
 ```
 
 Sample Output: 
