@@ -41,6 +41,14 @@ CREATE TABLE total_hour_suggestions (
     end_timestamp TIMESTAMP NOT NULL
 );
 
+-- Create the 'chore_hour_suggestions'
+CREATE TABLE chore_hour_suggestions (
+    resident_id INT NOT NULL,
+    chore_type VARCHAR(255) NOT NULL, 
+    start_timestamp TIMESTAMP NOT NULL,
+    end_timestamp TIMESTAMP NOT NULL
+);
+
 ---------------------------------------------------------
 -- Data population
 ---------------------------------------------------------
