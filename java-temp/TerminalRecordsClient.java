@@ -70,7 +70,7 @@ public class TerminalRecordsClient {
                 this.serviceOutcome.beforeFirst();
                 while (this.serviceOutcome.next()) {
                     System.out.printf(
-                        "Resident ID: %d | Start Time: %s | End Time: %s | Status: %s%n",
+                        "Resident ID: %d | Chore Type: %s | Start Time: %s | End Time: %s%n",
                         this.serviceOutcome.getInt("resident_id"),
                         this.serviceOutcome.getString("chore_type"),
                         this.serviceOutcome.getTimestamp("start_timestamp"),
