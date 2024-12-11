@@ -108,36 +108,6 @@ public class RecordsDatabaseService extends Thread{
 		
 		this.outcome = null;
 
-		// String sql = """
-        //    WITH selected_resident AS (
-        //        SELECT resident_id
-        //        FROM residents
-        //        WHERE firstName = ? AND lastName = ?
-        //    )
-        //    SELECT
-        //        ts.resident_id,
-        //        ts.chore_type,
-        //        ts.start_timestamp,
-        //        ts.end_timestamp,
-        //    FROM chore_hour_suggestions ts
-        //    WHERE ts.resident_id = (SELECT resident_id FROM selected_resident)
-        //    ORDER BY ts.resident_id;
-        //    """;
-        // String sql = """
-        //     WITH selected_resident AS (
-        //         SELECT resident_id
-        //         FROM residents
-        //         WHERE firstName = ? AND lastName = ?
-        //     )
-        //     SELECT 
-        //         ts.resident_id, 
-        //         ts.chore_type,
-        //         ts.start_timestamp, 
-        //         ts.end_timestamp
-        //     FROM chore_hours_suggestions ts
-        //     WHERE ts.resident_id = (SELECT resident_id FROM selected_resident)
-        //     ORDER BY ts.resident_id;
-        //     """;
         String sql = """
             WITH selected_resident AS (
                 SELECT resident_id
@@ -209,17 +179,6 @@ public class RecordsDatabaseService extends Thread{
                 System.out.println("Service thread " + this.getName() + ": No data to send.");
                 outcomeStreamWriter.writeObject(null); // Send a null object if no data
             } else {
-                System.out.println("Service thread " + this.getName() + ": Sending CachedRowSet with data:");
-                this.outcome.beforeFirst(); // Reset the cursor for sending data
-                while (this.outcome.next()) {
-                    System.out.println(
-                            "Resident ID: " + this.outcome.getInt("resident_id") +
-                            " | Start Time: " + this.outcome.getTimestamp("start_timestamp") +
-                            " | End Time: " + this.outcome.getTimestamp("end_timestamp") +
-                            " | Status: " + this.outcome.getString("status")
-                    );
-                }
-                this.outcome.beforeFirst(); // Reset the cursor for the client to process
                 outcomeStreamWriter.writeObject(this.outcome); // Send the CachedRowSet object
             }
     
