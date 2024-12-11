@@ -42,7 +42,7 @@ CREATE TABLE total_hour_suggestions (
 );
 
 -- Create the 'chore_hour_suggestions'
-CREATE TABLE total_hour_suggestions (
+CREATE TABLE chore_hour_suggestions (
     resident_id INT NOT NULL,
     chore_type VARCHAR(255) NOT NULL, 
     start_timestamp TIMESTAMP NOT NULL,
