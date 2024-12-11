@@ -10,6 +10,13 @@ CREATE TYPE chore_action AS ENUM ('start', 'finish');
 ---------------------------------------------------------
 -- Tables creation
 ---------------------------------------------------------
+-- Create the 'residents' table
+CREATE TABLE residents (
+    resident_id SERIAL PRIMARY KEY,
+    firstName VARCHAR(50) NOT NULL,
+    lastName VARCHAR(50) NOT NULL
+);
+
 -- Create the 'access_log' table
 CREATE TABLE access_log (
     access_id SERIAL PRIMARY KEY,
@@ -37,6 +44,14 @@ CREATE TABLE total_hour_suggestions (
 ---------------------------------------------------------
 -- Data population
 ---------------------------------------------------------
+-- Populate 'residents' table
+INSERT INTO residents (firstName, lastName) VALUES
+('Anson', 'Lo'),
+('Bruno', 'Mars'),
+('Charlie', 'Puth'),
+('Doja', 'Cat'),
+('John', 'Cena');
+
 -- Populate 'access_log' table
 INSERT INTO access_log (access_id, resident_id, timestamp, action) VALUES
 -- Day 1: Monday

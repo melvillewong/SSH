@@ -30,10 +30,7 @@ public class RecordsDatabaseServer {
         System.out.println("Server: Exit server application by pressing Ctrl+C (Windows or Linux) or Opt-Cmd-Shift-Esc (Mac OSX)." );
         try {
             //Initialize the socket
-
-            //TO BE COMPLETED
             serverSocket = new ServerSocket(thePort, 10, InetAddress.getByName(theIPAddress));
-
             System.out.println("Server: Server at " + theIPAddress + " is listening on port : " + thePort);
         } catch (Exception e){
             //The creation of the server socket can cause several exceptions;
@@ -50,10 +47,8 @@ public class RecordsDatabaseServer {
         try {
             //Service loop
             while (true) {
-
-                //TO BE COMPLETED
                 Socket socket = this.serverSocket.accept();
-                RecordsDatabaseService tmpServiceThread = new RecordsDatabaseService(socket);
+                new RecordsDatabaseService(socket);
             }
         } catch (Exception e){
             //The creation of the server socket can cause several exceptions;

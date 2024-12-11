@@ -67,15 +67,14 @@ public class TerminalRecordsClient {
                     return;
                 }
 
-                this.serviceOutcome.beforeFirst(); // Reset cursor
+                this.serviceOutcome.beforeFirst();
                 while (this.serviceOutcome.next()) {
                     System.out.printf(
-                            "Title: %s | Label: %s | Genre: %s | RRP: %.2f | Copies: %d%n",
-                            this.serviceOutcome.getString("title"),
-                            this.serviceOutcome.getString("label"),
-                            this.serviceOutcome.getString("genre"),
-                            this.serviceOutcome.getDouble("rrp"),
-                            this.serviceOutcome.getInt("copies")
+                        "Resident ID: %d | Start Time: %s | End Time: %s | Status: %s%n",
+                        this.serviceOutcome.getInt("resident_id"),
+                        this.serviceOutcome.getTimestamp("start_timestamp"),
+                        this.serviceOutcome.getTimestamp("end_timestamp"),
+                        this.serviceOutcome.getString("status")
                     );
                 }
             } catch (SQLException e) {
@@ -93,14 +92,14 @@ public class TerminalRecordsClient {
     public void execute() {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             // Get user input
-            System.out.print("Enter Artist's Surname: ");
-            String artistSurname = reader.readLine();
+            System.out.print("Enter Resident's First Name: ");
+            String firstName = reader.readLine();
 
-            System.out.print("Enter Record shop's city: ");
-            String recordShopCity = reader.readLine();
+            System.out.print("Enter Resident's Last Name: ");
+            String lastName = reader.readLine();
 
             // Build user message command
-            userCommand = artistSurname + ";" + recordShopCity;
+            userCommand = firstName + ";" + lastName;
 
             // Initialize the socket
             this.initializeSocket();
