@@ -18,36 +18,6 @@ public class Service extends Thread{
     private String PASSWORD = Credentials.PASSWORD;
     private String URL      = Credentials.URL;
 
-    // private void runSqlScript(String filePath) {
-    //     try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
-    //         System.out.println("Executing SQL script: " + filePath);
-            
-    //         // Read and execute SQL commands from the file
-    //         StringBuilder sqlBuilder = new StringBuilder();
-    //         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-    //             String line;
-    //             while ((line = reader.readLine()) != null) {
-    //                 sqlBuilder.append(line).append("\n");
-    //             }
-    //         }
-            
-    //         // Split commands by semicolon and execute them
-    //         String[] sqlCommands = sqlBuilder.toString().split(";");
-    //         try (Statement stmt = connection.createStatement()) {
-    //             for (String sql : sqlCommands) {
-    //                 if (!sql.trim().isEmpty()) {
-    //                     stmt.execute(sql.trim());
-    //                 }
-    //             }
-    //         }
-            
-    //         System.out.println("SQL script executed successfully.");
-    //     } catch (SQLException | IOException e) {
-    //         System.err.println("Error executing SQL script: " + e.getMessage());
-    //         e.printStackTrace();
-    //     }
-    // }
-
     private void runSqlScript(String scriptName) {
         try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
             System.out.println("Executing SQL script: " + scriptName);
@@ -91,6 +61,7 @@ public class Service extends Thread{
     //Class constructor
     public Service(Socket aSocket){
         serviceSocket = aSocket;
+        runSqlScript("autorun_chore_hour_suggestion.sql");
         runSqlScript("autorun_total_hour_suggestion.sql");
         System.out.println("SQL script executed and database state verified.");
         this.start();
@@ -146,19 +117,37 @@ public class Service extends Thread{
                 SELECT resident_id
                 FROM residents
                 WHERE firstName = ? AND lastName = ?
+            ),
+            solo_time AS (
+                SELECT 
+                    ts.resident_id, 
+                    ts.start_timestamp, 
+                    ts.end_timestamp, 
+                    CASE 
+                        WHEN ts.resident_id = 0 THEN 'Empty'
+                        ELSE 'Solo'
+                    END AS status,
+                    NULL::TEXT AS chore_type -- Placeholder for union compatibility
+                FROM total_hour_suggestions ts
+                WHERE ts.resident_id = 0 
+                OR ts.resident_id = (SELECT resident_id FROM selected_resident)
+            ),
+            chore_suggestions AS (
+                SELECT 
+                    ts.resident_id, 
+                    ts.start_timestamp, 
+                    ts.end_timestamp, 
+                    'Chore' AS status, -- Label to distinguish chore suggestions
+                    ts.chore_type
+                FROM chore_hours_suggestions ts
+                WHERE ts.resident_id = (SELECT resident_id FROM selected_resident)
             )
-            SELECT 
-                ts.resident_id, 
-                ts.start_timestamp, 
-                ts.end_timestamp, 
-                CASE 
-                    WHEN ts.resident_id = 0 THEN 'Empty'
-                    ELSE 'Solo'
-                END AS status
-            FROM total_hour_suggestions ts
-            WHERE ts.resident_id = 0 
-            OR ts.resident_id = (SELECT resident_id FROM selected_resident)
-            ORDER BY ts.start_timestamp;
+            SELECT *
+            FROM solo_time
+            UNION ALL
+            SELECT *
+            FROM chore_suggestions
+            ORDER BY resident_id, start_timestamp;
             """;
 
         try (Connection con = DriverManager.getConnection(URL, USERNAME, PASSWORD);
@@ -194,17 +183,6 @@ public class Service extends Thread{
                 System.out.println("Service thread " + this.getName() + ": No data to send.");
                 outcomeStreamWriter.writeObject(null); // Send a null object if no data
             } else {
-                System.out.println("Service thread " + this.getName() + ": Sending CachedRowSet with data:");
-                this.outcome.beforeFirst(); // Reset the cursor for sending data
-                while (this.outcome.next()) {
-                    System.out.println(
-                            "Resident ID: " + this.outcome.getInt("resident_id") +
-                            " | Start Time: " + this.outcome.getTimestamp("start_timestamp") +
-                            " | End Time: " + this.outcome.getTimestamp("end_timestamp") +
-                            " | Status: " + this.outcome.getString("status")
-                    );
-                }
-                this.outcome.beforeFirst(); // Reset the cursor for the client to process
                 outcomeStreamWriter.writeObject(this.outcome); // Send the CachedRowSet object
             }
     
