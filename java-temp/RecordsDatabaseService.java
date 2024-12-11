@@ -56,7 +56,7 @@ public class RecordsDatabaseService extends Thread{
     //Class constructor
     public RecordsDatabaseService(Socket aSocket){
         serviceSocket = aSocket;
-        runSqlScript("autorun_total_hour_suggestion.sql");
+        runSqlScript("java-temp/autorun_total_hour_suggestion.sql");
         System.out.println("SQL script executed and database state verified.");
         this.start();
     }
@@ -163,12 +163,12 @@ public class RecordsDatabaseService extends Thread{
                 System.out.println("Service thread " + this.getName() + ": Sending CachedRowSet with data:");
                 this.outcome.beforeFirst(); // Reset the cursor for sending data
                 while (this.outcome.next()) {
-                    System.out.println(
-                            "Resident ID: " + this.outcome.getInt("resident_id") +
-                            " | Start Time: " + this.outcome.getTimestamp("start_timestamp") +
-                            " | End Time: " + this.outcome.getTimestamp("end_timestamp") +
-                            " | Status: " + this.outcome.getString("status")
-                    );
+                    // System.out.println(
+                    //         "Resident ID: " + this.outcome.getInt("resident_id") +
+                    //         " | Start Time: " + this.outcome.getTimestamp("start_timestamp") +
+                    //         " | End Time: " + this.outcome.getTimestamp("end_timestamp") +
+                    //         " | Status: " + this.outcome.getString("status")
+                    // );
                 }
                 this.outcome.beforeFirst(); // Reset the cursor for the client to process
                 outcomeStreamWriter.writeObject(this.outcome); // Send the CachedRowSet object
