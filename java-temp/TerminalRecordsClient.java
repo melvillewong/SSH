@@ -72,7 +72,7 @@ public class TerminalRecordsClient {
                     System.out.printf(
                         "Resident ID: %d | Start Time: %s | End Time: %s | Status: %s%n",
                         this.serviceOutcome.getInt("resident_id"),
-                        this.serviceOutcome.getCharacterStream("chore_type"),
+                        this.serviceOutcome.getString("chore_type"),
                         this.serviceOutcome.getTimestamp("start_timestamp"),
                         this.serviceOutcome.getTimestamp("end_timestamp")
                     );
