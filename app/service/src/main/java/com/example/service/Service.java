@@ -81,7 +81,7 @@ public class Service extends Thread{
             StringBuffer lastNameStringBuffer = new StringBuffer();
             boolean deter = true;
             char x;
-            while (true) //Read until terminator character is found
+            while (true)
             {
                 x = (char) socketReader.read();
                 if (x == '#') {
@@ -181,9 +181,9 @@ public class Service extends Thread{
             // Check if there is data to send
             if (this.outcome == null || !this.outcome.next()) {
                 System.out.println("Service thread " + this.getName() + ": No data to send.");
-                outcomeStreamWriter.writeObject(null); // Send a null object if no data
+                outcomeStreamWriter.writeObject(null); 
             } else {
-                outcomeStreamWriter.writeObject(this.outcome); // Send the CachedRowSet object
+                outcomeStreamWriter.writeObject(this.outcome); 
             }
     
             // Flush and close the stream

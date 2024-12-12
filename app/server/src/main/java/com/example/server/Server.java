@@ -13,9 +13,6 @@ public class Server {
     private String theIPAddress = null;
     private ServerSocket serverSocket =  null;
 
-    //Support for closing the server
-    //private boolean keypressedFlag = false;
-
     //Class constructor
     public Server(){
         //Initialize the TCP socket
@@ -30,43 +27,28 @@ public class Server {
             serverSocket = new ServerSocket(thePort, 10, InetAddress.getByName(theIPAddress));
             System.out.println("Server: Server at " + theIPAddress + " is listening on port : " + thePort);
         } catch (Exception e){
-            //The creation of the server socket can cause several exceptions;
-            //See https://docs.oracle.com/javase/7/docs/api/java/net/ServerSocket.html
             System.out.println(e);
             System.exit(1);
         }
     }
 
-    //Runs the service loop
     public void executeServiceLoop()
     {
         System.out.println("Server: Start service loop.");
         try {
-            //Service loop
             while (true) {
                 Socket socket = this.serverSocket.accept();
                 new Service(socket);
             }
         } catch (Exception e){
-            //The creation of the server socket can cause several exceptions;
-            //See https://docs.oracle.com/javase/7/docs/api/java/net/ServerSocket.html
             System.out.println(e);
         }
         System.out.println("Server: Finished service loop.");
     }
 
-/*
-	@Override
-	protected void finalize() {
-		//If this server has to be killed by the launcher with destroyForcibly
-		//make sure we also kill the service threads.
-		System.exit(0);
-	}
-*/
-
     public static void main(String[] args){
         //Run the server
-        Server server=new Server(); //inc. Initializing the socket
+        Server server = new Server();
         server.executeServiceLoop();
         System.out.println("Server: Finished.");
         System.exit(0);
