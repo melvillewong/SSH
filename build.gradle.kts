@@ -15,24 +15,16 @@ subprojects {
     // Common configuration for all submodules
     apply(plugin = "application")
 
-    // dependencies {
-    //     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
-    //     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
-    // }
-
-    // tasks.test {
-    //     useJUnitPlatform() // Use JUnit for testing
-    // }
-
-    tasks.withType<Test> {
-        enabled = false
+    dependencies {
+        testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
     }
+
+    tasks.named<Test>("test") {
+        useJUnitPlatform() // Use JUnit for testing
+    }
+
+    // tasks.withType<Test> {
+    //     enabled = false
+    // }
 }
-
-// task("runServerThenClient") {
-//     dependsOn(":server:run", ":client:run")
-
-//     doLast {
-//         println("Server and Client have run.")
-//     }
-// }
