@@ -1,5 +1,5 @@
 plugins {
-    id("com.bmuschko.docker-remote-api") version "7.1.0"                // docker plugin
+    id("com.bmuschko.docker-remote-api") version "7.1.0"    // docker plugin
 }
 
 application {

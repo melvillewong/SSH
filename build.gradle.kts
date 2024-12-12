@@ -1,5 +1,4 @@
 plugins {
-    // Apply plugins for common configurations (e.g., Java application plugin)
     base
 }
 
@@ -12,7 +11,6 @@ allprojects {
 }
 
 subprojects {
-    // Common configuration for all submodules
     apply(plugin = "application")
 
     dependencies {
@@ -21,10 +19,6 @@ subprojects {
     }
 
     tasks.named<Test>("test") {
-        useJUnitPlatform() // Use JUnit for testing
+        useJUnitPlatform()
     }
-
-    // tasks.withType<Test> {
-    //     enabled = false
-    // }
 }
