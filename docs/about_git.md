@@ -33,10 +33,37 @@ This helps maintain clarity and allows you to work on different types of tasks w
 4. `git push origin <feature/branch-name>` to push your feature branch to remote repository (Github)
 5. Go to your Github repository and submit a PR for approval to merge your feature branch with the main branch
 
-## Make Sure Your Branches are on the Latest Version
+## Ensure Your Branches are on the Latest Version
 
 1. `git checkout main` to switch to main branch.
 2. `git fetch origin` to fetch the latest changes from the remote repository.
 3. `git merge origin/main` to merge the remote main changes into your local main branch.
 4. `git checkout <feature/branch-name>` to switch back to your feature branch.
 5. `git merge main` to merge the main branch changes into your feature branch.
+
+## Modify your Commit
+
+### Add Staged Files to the Previous Commit
+`--amend` option tells Git to modify the last commit.
+
+1. `git add <file1> <file2>` (or `git add .` to add all) to stage the files.
+2. `git commit --amend --no-edit` to amend the previous commit with the newly staged files.
+    + `--no-edit` will use the same commit message from the previous one.
+    + Replace with `-m "<your-message>"` if you want to edit the previous message.
+
+### Reset to a Previous Commit
+`git reset` allows you to reset to a previous commit.
+
++ `git reset --soft <commit>` resets and **keeps changes** in your working directory
++ `git reset --hard <commit>` resets and **discards changes**
++ `git reset --mixed <commit>` resets and **keeps changes unstaged**
+
+#### For `<commit>`:
+Options:
+1. Use `Head~1`, which backwards one commit from the Head.
+2. Use `<commit-hash>` (check it by `git log`), which resets to the commit you chose.
+
+#### Example:
+1. `git reset --mixed HEAD~1`
+2. `git add .`
+3. `git commit -m "my_commit"`

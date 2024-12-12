@@ -14,16 +14,15 @@ jobs:
         name: "Build"
         runs-on: "ubuntu-latest"
 
-        # matrix of java versions
         strategy:
             matrix:
-                java-version: [8, 17, 21 ,23]
+                java-version: [17, 21, 23]
 
         steps:
             - name: "Clone repository"
               uses: actions/checkout@v4
 
-            - name: "Java setup"
+            - name: "Java Setup"
               uses: actions/setup-java@v4
               with:
                 distribution: "temurin"
@@ -31,12 +30,3 @@ jobs:
 
             - name: "Build project"
               run: ./gradlew build
-
-            - name: "Produce distribution"
-              run: ./gradlew distZip
-
-            - name: "Upload artifact"
-              uses: actions/upload-artifact@v4
-              with:
-                path: build/distribution/SSH.zip
-                name: ssh-java-${{ matrix.java-version }}

@@ -1,7 +1,6 @@
 ## Prerequisites
 - PostgreSQL 14.0
 - Docker Installation
-
 ___
 
 ### Docker Installation Tutorial with migration implementation (Flyway)
